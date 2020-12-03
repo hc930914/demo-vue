@@ -1,0 +1,56 @@
+kind: pipeline
+name: 应用发布
+platform:
+  os: linux
+  arch: amd64
+steps:
+  - name: 代码编译
+    image: node:14.15.1
+    volumes:
+      - name: cache
+        path: /node_modules
+    environment:
+      NODE_ENV: product
+    commands:
+      - npm config set registry http://registry.npm.taobao.org
+      - npm install
+      - npm run build
+  - name: 构建镜像
+    image: plugins/docker
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    settings:
+      username: qq478502053
+      password: hou987656
+      registry: registry.cn-beijing.aliyuncs.com
+      repo: registry.cn-beijing.aliyuncs.com/rock_chao/${DRONE_REPO_NAME}
+      tags: ${DRONE_COMMIT}
+    when:
+      event: [ promote ]
+  - name: 应用部署
+    image: appleboy/drone-ssh
+    settings:
+      host: 47.93.48.50
+      username: root
+      password: Hou987656
+      port: 22
+      script:
+        - echo "connect server..."
+        - docker stop ${DRONE_REPO_NAME}
+        - echo "stop container..."
+        - docker rm ${DRONE_REPO_NAME}
+        - echo "remove container..."
+        - docker rmi $(docker images | grep "registry.cn-beijing.aliyuncs.com/rock_chao/${DRONE_REPO_NAME}" | awk '{print $3}')
+        - echo "remove images..."
+        - docker run -d --name ${DRONE_REPO_NAME} -p 8098:8080 registry.cn-beijing.aliyuncs.com/rock_chao/${DRONE_REPO_NAME}:${DRONE_COMMIT}
+        - echo "docker images run ..."
+    when:
+      event: [ promote ]
+volumes:
+  - name: cache
+    host:
+      path: /tmp/cache/${DRONE_REPO_NAME}/node_modules
+  - name: docker
+    host:
+      path: /var/run/docker.sock
