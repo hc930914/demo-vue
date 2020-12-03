@@ -10,11 +10,11 @@ steps:
       - name: cache
         path: /node_modules
     environment:
-      NODE_ENV: product
+      NODE_ENV: prod
     commands:
       - npm config set registry http://registry.npm.taobao.org
       - npm install
-      - npm run build
+      - npm run prod
   - name: 构建镜像
     image: plugins/docker
     volumes:
