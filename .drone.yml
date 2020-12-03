@@ -12,9 +12,10 @@ steps:
     environment:
       NODE_ENV: test
     commands:
+      - rm -rf package-lock.json
       - npm config set registry http://registry.npm.taobao.org
       - npm install
-      - npm run serve
+      - npm run test
   - name: 构建镜像
     image: plugins/docker
     volumes:
