@@ -43,7 +43,7 @@ steps:
         - echo "remove container..."
         - docker rmi $(docker images | grep "registry.cn-beijing.aliyuncs.com/rock_chao/${DRONE_REPO_NAME}" | awk '{print $3}')
         - echo "remove images..."
-        - docker run -d --name ${DRONE_REPO_NAME} -p 8080:8080 registry.cn-beijing.aliyuncs.com/rock_chao/${DRONE_REPO_NAME}:${DRONE_COMMIT}
+        - docker run -d --name ${DRONE_REPO_NAME} -p 8080:80 registry.cn-beijing.aliyuncs.com/rock_chao/${DRONE_REPO_NAME}:${DRONE_COMMIT}
         - echo "docker images run ..."
     when:
       event: [ promote ]
